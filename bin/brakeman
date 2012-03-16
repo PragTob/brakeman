@@ -6,16 +6,15 @@ require 'brakeman'
 require 'brakeman/options'
 require 'brakeman/version'
 
-trap("INT") do
-  $stderr.puts "\nInterrupted - exiting."
-  if RUBY_VERSION.include? "1.9"
-    $stderr.puts Thread.current.backtrace
-  end
-  exit!
-end
-
 #Parse options
 options, parser = Brakeman::Options.parse! ARGV
+
+trap("INT") do
+  $stderr.puts "\nInterrupted - exiting."
+  # backtrace
+  $stderr.puts caller if options[:debug]
+  exit!
+end
 
 #Exit early for these options
 if options[:list_checks]
@@ -51,3 +50,4 @@ tracker = Brakeman.run options.merge(:print_report => true, :quiet => options[:q
 if options[:exit_on_warn] and not tracker.checks.all_warnings.empty?
   exit Brakeman::Warnings_Found_Exit_Code
 end
+
